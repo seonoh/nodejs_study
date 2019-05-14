@@ -1,0 +1,30 @@
+{
+	"first_user": {
+		"password": "first_pass",
+		"name": "seonoh"
+	},
+	"newuser": {
+		"password": "q111122",
+		"name": "wenwo"
+	},
+	"seonoh": {
+		"password": "q1111",
+		"name": "seonoh"
+	},
+	"bitna": {
+		"password": "q1111",
+		"name": "seonoh"
+	},
+	"ì ì§": {
+		"password": "q1111",
+		"name": "Yu"
+	},
+	"JinHyukYu": {
+		"password": "q1111",
+		"name": "Yu"
+	},
+	"SangHae": {
+		"password": "q1111",
+		"name": "SangHae"
+	}
+}
