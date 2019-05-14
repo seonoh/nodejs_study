@@ -1,13 +1,22 @@
+// 모듈 정의
 module.exports = function(app, fs)
 {
+
+    //현재 파일 경로 출력
+    console.log('filename : ',__filename);
+
+    //현재 파일의 루트 출력
+    console.log('dirname',__dirname);
+
 
      app.get('/',function(req,res){
          var sess = req.session;
 
 
+         //view 템플리트를 렌더링한다.
          res.render('index', {
              title: "MY HOMEPAGE",
-             length: 5,
+             length: 10,
              name : sess.name,
              username : sess.username
          })
@@ -27,18 +36,30 @@ module.exports = function(app, fs)
        });
     });
 
+    let one = {};
+    let one = 3;
+
+    
+    console.log('dir ->>>>> ',__dirname + "/../data/user.json");
     app.post('/addUser/:username', function(req, res){
 
         var result = {  };
         var username = req.params.username;
 
+
+       
+
+
         // CHECK REQ VALIDITY
         if(!req.body["password"] || !req.body["name"]){
             result["success"] = 0;
+
             result["error"] = "invalid request";
             res.json(result);
             return;
         }
+
+      
 
         // LOAD DATA & CHECK DUPLICATION
         fs.readFile( __dirname + "/../data/user.json", 'utf8',  function(err, data){
