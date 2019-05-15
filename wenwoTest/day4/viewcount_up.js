@@ -45,26 +45,23 @@
 
 var request = require("request");
     
-
-
-var i = 0;
-
-function cntUp(i,callback){
+function cntUp(num,callback){
     request("https://linkareer.com/activity/22113",function(err,res){
-        console.log(i + " -->>>  STATUS CODE : " + res.statusCode);
+        console.log(num + " -->>>  STATUS CODE : " + res.statusCode);
 
-        if(i>5){
+        if(num>5){
             callback();
         }else{
-            cntUp(++i,callback);
+            cntUp(++num,callback);
         }
     })
 
 }
 
-cntUp(0,function(){
+cntUp(1,function(){
     console.log('complete!!');
-})
+});
+
 
 
 
