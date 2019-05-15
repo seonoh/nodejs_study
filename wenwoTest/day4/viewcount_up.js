@@ -11,20 +11,38 @@
 //         })
 // }
 
-// setTimeout(function(){console.log(1)},1000);
-// setTimeout(function(){console.log(2)},2000);
+// function loop(){
+//     for(var i=1; i<100; i++){
+//         delay(i);
+//     }
+// }
 
-function loop(){
-    for(var i=1; i<100; i++){
-        delay(i);
-    }
+// function delay(number){
+//     setTimeout(function(){console.log(number)},number*1000);
+// }
+
+// loop();
+
+
+    
+function getSecond(i,callback){
+    setTimeout(function(){
+        console.log(i);
+
+        if(i>10){
+            callback();
+        }else{
+            getSecond(++i,callback);
+        }
+    },1000);
 }
 
-function delay(number){
-    setTimeout(function(){console.log(number)},number*1000);
-}
+getSecond(1,function(){
 
-loop();
+    console.log('end');
+});
+
+
 
 
 
