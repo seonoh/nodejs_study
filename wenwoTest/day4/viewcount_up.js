@@ -25,23 +25,46 @@
 
 
     
-function getSecond(i,callback){
-    setTimeout(function(){
-        console.log(i);
+// function getSecond(i,callback){
+//     setTimeout(function(){
+//         console.log(i);
 
-        if(i>10){
+//         if(i>10){
+//             callback();
+//         }else{
+//             getSecond(++i,callback);
+//         }
+//     },1000);
+// }
+
+// getSecond(1,function(){
+
+//     console.log('end');
+// });
+
+
+var request = require("request");
+    
+
+
+var i = 0;
+
+function cntUp(i,callback){
+    request("https://linkareer.com/activity/22113",function(err,res){
+        console.log(i + " -->>>  STATUS CODE : " + res.statusCode);
+
+        if(i>5){
             callback();
         }else{
-            getSecond(++i,callback);
+            cntUp(++i,callback);
         }
-    },1000);
+    })
+
 }
 
-getSecond(1,function(){
-
-    console.log('end');
-});
-
+cntUp(0,function(){
+    console.log('complete!!');
+})
 
 
 
