@@ -1,34 +1,35 @@
 let i = 1;
 
-var promise = function(param){
+var _promise = function(param){
+
+
     return new Promise(function(resolve, reject){
 
         setTimeout(function(){
             if(param) {
 
-                if(i<=10){
-                    console.log(`${i++} second ..`);
-                    promise(true);
+
+                if(i<=5){
+                    console.log(`${i} second..`)
+                    i++;
+                    _promise(true);
                 }else{
-                    resolve(`${i++} second ..`);
-                
+                    console.log(`complete !!`);
+                    // resolve(`complete !!`);
+
                 }
                 
-            } else{
+            } else {
                 reject("failed !!");
-            } 
-        },1000);
+            }
 
+        },1000);
     });
 };
 
-promise(true)
+_promise(true)
     .then(function(text){
-
         console.log(text);
-
-        promise(true);
-
     }, function(error){
         console.log(error);
     })
