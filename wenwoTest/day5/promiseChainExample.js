@@ -26,6 +26,7 @@ new Promise(function (resolve, reject) {
             
             }).then(function(num){
                 console.log(num);
+                console.log('test');
             })
         })
     })
