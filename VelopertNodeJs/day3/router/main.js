@@ -39,11 +39,12 @@ module.exports = function(app, fs)
     let one = {};
     let one = 3;
 
-    
+
     console.log('dir ->>>>> ',__dirname + "/../data/user.json");
     app.post('/addUser/:username', function(req, res){
 
-        var result = {  };
+        var result = {};
+        
         var username = req.params.username;
 
 

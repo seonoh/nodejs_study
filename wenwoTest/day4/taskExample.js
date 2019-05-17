@@ -1,5 +1,5 @@
-// var request = require('request');
-// const cluster = require('cluster');
+var request = require("request");
+const cluster = require('cluster');
 // var numCPUs = require('os').cpus().length; // CPU 개수 가져오기
 
 // if(cluster.isMaster){
@@ -20,29 +20,53 @@
 // var thirdWorker = cluster.fork();
 
 var request = require('request');
+var requestCnt = 0;
 
 function requestHttp(id,callback){
-    request("https://linkareer.com/activity/22113",function(err,res){
-        console.log("id",id);
-        callback("id : "+id+" STATUS_CODE ---->>> "+res.statusCode);
-        requestHttp(id,callback);
+    ++requestCnt;
 
-    });
-
+    if(requestCnt<101){
+        request("https://linkareer.com/activity/22113",function(err,res){
+            `요청횟수 : ${requestCnt} id : ${id}`
+            callback("요청횟수 : "+(requestCnt)+" id : "+id+" STATUS_CODE ---->>> "+res.statusCode);
+            callback("요청횟수 : "+(requestCnt)+" id : "+id+" STATUS_CODE ---->>> "+res.statusCode);
+            requestHttp(id,callback);
+        });
+    }
 }
 
-
-    requestHttp("1",function(msg){
-        console.log(msg);
+function startRequest(id){
+    requestHttp(id,function(msg){
+            console.log(msg);
     });
+}
 
-    requestHttp("2",function(msg){
-        console.log(msg);
-    });
+startRequest(1);
+console.log('cnt',requestCnt);
+startRequest(2);
+startRequest(3);
 
-    requestHttp("3",function(msg){
-        console.log(msg);
-    });
+    // requestHttp("1",function(msg){
+    //     if(requestCnt<101){
+    //         console.log(msg);
+    //     }
+        
+
+    // });
+
+    // requestHttp("2",function(msg){
+    //     if(requestCnt<101){
+    //         console.log(msg);
+    //     }
+
+    // });
+
+    // requestHttp("3",function(msg){
+    //     if(requestCnt<101){
+    //         console.log(msg);
+    //     }
+        
+    // });
 
    
 
