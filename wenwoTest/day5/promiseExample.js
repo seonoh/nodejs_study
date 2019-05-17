@@ -1,9 +1,6 @@
 let i = 1;
 
 var _promise = function (param) {
-
-
-
     return new Promise(function (resolve, reject) {
 
         setTimeout(function () {
