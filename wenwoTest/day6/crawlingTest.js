@@ -33,24 +33,39 @@ const getMangoPlateData = async () => {
 
         var $ = cheerioModule.load(data['data']);
 
-        $test = $(`body > main > article > div.column-wrapper > div > div > section > div.search-list-restaurants-inner-wrap > ul > li`),
-
-            $test.each(function (i, item) {
+        $test = $(`body > main > article > div.column-wrapper > div > div > section > div.search-list-restaurants-inner-wrap > ul > li`);
+            for (let item of $test){
                 $title = $(item).find(`.title`);
                 $href = $(item).find(`figure > figcaption > div > a`).attr('href');
 
                 console.log(i + " -> " + $title.text());
 
                 let mangoItem = new MangoItem( $title.text() ,$href );
+
                 async function test() {
-                    sleep
+
                     await getDetailItem(mangoItem.href);
                 } 
 
-                test();
+                await test();
+            }
+            // $test.each(async function (i, item) {
+            //     $title = $(item).find(`.title`);
+            //     $href = $(item).find(`figure > figcaption > div > a`).attr('href');
+
+            //     console.log(i + " -> " + $title.text());
+
+            //     let mangoItem = new MangoItem( $title.text() ,$href );
+
+            //     async function test() {
+
+            //         await getDetailItem(mangoItem.href);
+            //     } 
+
+            //     await test();
                 
             
-            })
+            // })
 
     } catch (err) {
         console.log(err);
@@ -80,11 +95,6 @@ const getDetailItem = async(href) =>{
             phoneNum = _(item).find('tr.only-desktop>td').text();
             console.log(` 주소 : ${address}`);
         })
-        
-
-        
-
-
         
 
     
