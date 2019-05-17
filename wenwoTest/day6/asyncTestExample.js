@@ -2,19 +2,14 @@
 let i = 1;
 
 
-let asyncFunctionOne = (msg) => new Promise((resolve) => {
-    ++i;
-    setTimeout(()=>{
-        console.log(`asyncFunctionOne execute !!`,msg);
-        if(i<6){
-            asyncFunctionOne(`${i} ==>> asyncFunctionOne execute `);
-        }else{
-            resolve(`asyncFunctionOne 11111111`);
-        }
-        
-    },1000)
-}).then((msg)=>{
-    console.log("COMPLETE !!");
+
+let asyncFunctionOne = (num) => new Promise((resolve) => {
+    setTimeout(() => {
+        resolve(`${num} second...`)
+    }, 1000);
+}).then((msg) => {
+    console.log(msg);
+    ;
 });
 
 // let asyncFunctionTwo = (msg) => new Promise((resolve) => {
@@ -25,11 +20,15 @@ let asyncFunctionOne = (msg) => new Promise((resolve) => {
 // });
 
 async function asyncMain() {
-    let result = await asyncFunctionOne('First asyncFunctionOne execute !!');
-    console.log(`${result}`);
+    // let result = await asyncFunctionOne('First asyncFunctionOne execute !!');
 
-    result = await asyncFunctionTwo('WORLD !!');
-    console.log(`${result}`);
+    for (let k = 1; k <= 1001; k++) {
+        let result =  await asyncFunctionOne(k);
+    }
+    
+
+    // result = await asyncFunctionTwo('WORLD !!');
+    // console.log(`${result}`);
 }
 
 
