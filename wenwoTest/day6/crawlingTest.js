@@ -26,6 +26,11 @@ var mangoConfig = {
 //     }
 //   })
 
+async function test(item) {
+
+    await getDetailItem(item);
+} 
+
 const getMangoPlateData = async () => {
     try {
 
@@ -34,38 +39,18 @@ const getMangoPlateData = async () => {
         var $ = cheerioModule.load(data['data']);
 
         $test = $(`body > main > article > div.column-wrapper > div > div > section > div.search-list-restaurants-inner-wrap > ul > li`);
-            for (let item of $test){
+            
+            $test.each(async function (i, item) {
                 $title = $(item).find(`.title`);
                 $href = $(item).find(`figure > figcaption > div > a`).attr('href');
 
-                console.log(i + " -> " + $title.text());
-
                 let mangoItem = new MangoItem( $title.text() ,$href );
 
-                async function test() {
-
-                    await getDetailItem(mangoItem.href);
-                } 
-
-                await test();
-            }
-            // $test.each(async function (i, item) {
-            //     $title = $(item).find(`.title`);
-            //     $href = $(item).find(`figure > figcaption > div > a`).attr('href');
-
-            //     console.log(i + " -> " + $title.text());
-
-            //     let mangoItem = new MangoItem( $title.text() ,$href );
-
-            //     async function test() {
-
-            //         await getDetailItem(mangoItem.href);
-            //     } 
-
-            //     await test();
-                
+                // await test(mangoItem.href);
+                await test(mangoItem);
+                // console.log(i + " -> " + $title.text());
             
-            // })
+            });
 
     } catch (err) {
         console.log(err);
@@ -77,10 +62,12 @@ function MangoItem(title, href){
     this.href = href;
 }
 
-const getDetailItem = async(href) =>{
+const getDetailItem = async(mangoItem) =>{
     try {
 
-        let result = await axiosModule(`https://www.mangoplate.com${href}`, mangoConfig);
+        // console.log(`${mangoItem.title}`)
+
+        let result = await axiosModule(`https://www.mangoplate.com${mangoItem.href}`, mangoConfig);
 
         // console.log(result['data']);
 
@@ -93,7 +80,9 @@ const getDetailItem = async(href) =>{
             address = _(item).find('tr.only-desktop>td').text();
             titlePhoneNum = _(item).find('tr.only-desktop>th').text();
             phoneNum = _(item).find('tr.only-desktop>td').text();
-            console.log(` 주소 : ${address}`);
+            console.log(`${mangoItem.title}`);
+            console.log(` 주소 : ${address}\n`);
+
         })
         
 
