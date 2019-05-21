@@ -9,52 +9,37 @@ var mangoConfig = {
     }
 }
 
-function test(item) {
-    getDetailItem(item);
-}
-
-async function searchTitle(titleList,href){
-
-
-
-    for(var i = 0; i<titleList.length; i++){
-        console.log(`@#@#@#@# ${titleList}`)
-        // let mangoItem = new MangoItem(titleList.firstChild[`data`],href);
-        // console.log(`i : ${i} title : ${titleList.firstChild[`data`]} href : ${href}`)
-
-        // await getDetailItem(mangoItem)
-    }
-   
-}
-
 const getMangoPlateData = async () => {
     try {
-        
 
-        var data =  await axiosModule('https://www.mangoplate.com/search/%EB%AA%85%EB%8F%99?keyword=%EB%AA%85%EB%8F%99&page=1', mangoConfig)
+
+        var data = await axiosModule('https://www.mangoplate.com/search/%EB%AA%85%EB%8F%99?keyword=%EB%AA%85%EB%8F%99&page=1', mangoConfig)
 
         var result = cheerioModule.load(data['data']);
         // > li:nth-child(1) > div:nth-child(1) > figure > figcaption > div > a > h2
-        var titleList  = result(`body > main > article > div.column-wrapper > div > div > section > div.search-list-restaurants-inner-wrap > ul > li`);
+        var titleList = result(`body > main > article > div.column-wrapper > div > div > section > div.search-list-restaurants-inner-wrap > ul > li`);
         var href  = result(`body > main > article > div.column-wrapper > div > div > section > div.search-list-restaurants-inner-wrap > ul > li:nth-child(1) > div:nth-child(1) > figure > figcaption > div > a`).attr(`href`);
-        
-        var title  = titleList.find(`.title`)
-        
-        searchTitle(title,href)
-        
-        // title.each(async function(i,item){
+
+       
+        var title = titleList.find(`.title`);
+
+
+        title.each(async function (i, item) {
+            $title = $(item).find(`.title`);
+            $href = $(item).find(`figure > figcaption > div > a`).attr('href');
+            let mangoItem = new MangoItem( $title.text() ,$href );
             
-        //     // console.log(item.firstChild)
+            console.log(`href : ${$href}`)
+           
+            // let mangoItem = new MangoItem(item.firstChild[`data`], href);
+            // console.log(`i : ${i} title : ${item.firstChild[`data`]} href : ${href}`)
 
-        //     let mangoItem = new MangoItem(item.firstChild[`data`],href);
-        //     console.log(`i : ${i} title : ${item.firstChild[`data`]} href : ${href}`)
-
-        //     await getDetailItem(mangoItem)
-        // })
+            await getDetailItem(mangoItem)
+        })
 
 
 
-        
+
 
 
     } catch (err) {
@@ -67,45 +52,23 @@ function MangoItem(title, href) {
     this.href = href;
 }
 
-async function searchAddress(addressList){
-    addressList.each(function (i, item) {
-
-            
-        titlePhoneNum = _(item).find('tr.only-desktop>th').text();
-        phoneNum = _(item).find('tr.only-desktop>td').text();
-        // console.log(`${mangoItem.title}`);
-        console.log(` 주소 : ${address}\n`);
-
-    })
-}
-
 const getDetailItem = async (mangoItem) => {
     try {
 
-        // console.log(`${mangoItem.title}`)
-
         let result = await axiosModule(`https://www.mangoplate.com${mangoItem.href}`, mangoConfig);
-
-        // console.log(result['data']);
 
         _ = cheerioModule.load(result['data']);
 
         _detail = _('body > main > article > div.column-wrapper > div.column-contents > div > section.restaurant-detail > table > tbody');
+        // console.log(` _detail : ${_detail.text()}\n`);
 
+        _detail.each(function (i, item) {
 
-        address = _(_detail).find('tr.only-desktop>td').text();
-        console.log(` 주소 : ${address}\n`);
-        
-        searchAddress(_detail)
-        // _detail.each(function (i, item) {
+            address = _(_detail).find('tr.only-desktop>td').text();
+            mangoItem.address = address;
+            // console.log(` 주소 : ${address}\n`);
 
-            
-        //     titlePhoneNum = _(item).find('tr.only-desktop>th').text();
-        //     phoneNum = _(item).find('tr.only-desktop>td').text();
-        //     // console.log(`${mangoItem.title}`);
-        //     console.log(` 주소 : ${address}\n`);
-
-        // })
+        })
 
 
 
@@ -115,4 +78,5 @@ const getDetailItem = async (mangoItem) => {
 }
 
 getMangoPlateData();
-// console.log(`COMPLETE !!!`)
+
+
