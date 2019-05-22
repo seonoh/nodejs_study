@@ -1,0 +1,19 @@
+{
+  "name": "day9",
+  "version": "1.0.0",
+  "description": "한국관광공사 크롤링 테스트",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.18.0",
+    "cheerio": "^1.0.0-rc.3",
+    "form-data": "^2.3.3",
+    "querystring": "^0.2.0",
+    "request": "^2.88.0",
+    "url-search-params-polyfill": "^6.0.0"
+  }
+}
