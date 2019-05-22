@@ -2,6 +2,8 @@ let axiosModule = require('axios');
 let cheerioModule = require('cheerio');
 
 let totalCnt = '';
+let finalKoreaVisitItem = [{}];
+let text = '';
 
 // 총 데이터의 개수 함수
 const getTotalCnt = async () => {
@@ -67,10 +69,13 @@ const getKoreaVisitData = async (cnt) => {
         })
 
         let koreaVisitItem = result.data['body']['result']
+        // console.log(koreaVisitItem[0].title);
+        // finalKoreaVisitItem[0].title = koreaVisitItem[0].title
 
         for(let i = 0; i<koreaVisitItem.length; i++){
-            await getDetailData(koreaVisitItem[i])
-            // console.log(`${i} ==>> ${koreaVisitItem[i].cotId}`);
+            
+            await getDetailData(i,koreaVisitItem[i])
+            
         }
 
         // console.log(koreaVisitItem);
@@ -85,7 +90,7 @@ const getKoreaVisitData = async (cnt) => {
 }
 // {"cmd":"TOUR_CONTENT_BODY_VIEW","cotid":"d09abaad-511e-492d-a098-efebbb3f0a52"
 // ,"locationx":"37.5891356","locationy":"127.01871489999999"}: 
-const getDetailData = async (item) => {
+const getDetailData = async (index,item) => {
     let result = '';
 
     try {
@@ -106,12 +111,52 @@ const getDetailData = async (item) => {
             }
         )
 
-        console.log(result.data['body']['article'])
+        
+
+        let detailItem = result.data['body']['article'][0]
+        console.log(`${index}.${item.title} \n`)
+
+        text += index+"."+item.title.trim()+" "+item.addr1+" "+item.tagName+" "+item.telNo+" "+detailItem.infoCenter+" "+detailItem.overView+" \n"
+        await koreaVisitItemWrite(text);
+        
+        // console.log(item)
+
+        // let detailItemList = result.data['body']['article']
+        // console.log(result.data['body']['article'][0])
 
     } catch (err) {
         console.log(err)
         return;
     }
+}
+
+
+    // cotId,addr2,distance,addr1,sigunguCode,title,tagName,
+    // telNo,areaCode,viewCnt,imgPath,contentType,cid,
+
+    // parking,distance,tagId,infoCenter,title,mapY,contentStatus,
+    // mapX,overView,areaName,sigunguName,useTime,tel,contentType,
+    // cotId,addr2,addr1,sigunguCode,dept,tagName,telNo,
+    // setStatus,areaCode,heritage3,heritage2,heritage1,
+    // imgPath,restDate,imgAlt,cid,deptView,homepage,useCash
+
+
+async function koreaVisitItemWrite(text) {
+
+
+
+    var fs = require('fs');
+
+    await fs.writeFile(`./한국관광공사.csv`, text, function (err) {
+        if (err) {
+            console.log(err)
+        } else {
+            console.log(`PROCESS COMPLETED !!`)
+        }
+    })
+
+
+
 }
 
 // 한국관광공사 크롤링 시작
