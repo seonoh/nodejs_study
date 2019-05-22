@@ -28,7 +28,13 @@ var getData = async () => {
             }
         })
 
-        console.log(JSON.stringify(koreaData.data))
+        var item = koreaData.data['body']['result'];
+
+        for(var i=0; i<item.length; i++){
+            console.log(item[i].title)
+        }
+
+
         
         
     } catch (err) {
