@@ -32,7 +32,7 @@ const getTotalCnt = async () => {
 
         totalCnt = koreaData.data['body']['totalCount']
 
-        console.log(`TOTAL_COUNT ==> ${totalCnt}`)
+        console.log(`TOTAL_COUNT ==> ${totalCnt}\n\n`)
         return totalCnt;
 
     } catch (err) {
@@ -60,7 +60,7 @@ const getKoreaVisitData = async (cnt) => {
                 'locationy': "0",
                 'page': "1",
                 // 'cnt': `${cnt}`
-                'cnt': `10`
+                cnt: `1000`
             },
             headers: {
                 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.157 Safari/537.36',
@@ -69,16 +69,15 @@ const getKoreaVisitData = async (cnt) => {
         })
 
         let koreaVisitItem = result.data['body']['result']
-        // console.log(koreaVisitItem[0].title);
-        // finalKoreaVisitItem[0].title = koreaVisitItem[0].title
+
+        console.log(`크롤링 데이터 TotalCount : ${cnt}`)
 
         for(let i = 0; i<koreaVisitItem.length; i++){
             
             await getDetailData(i,koreaVisitItem[i])
-            
+            console.log(`크롤링 진행도 : ${i}/${cnt}`)
         }
 
-        // console.log(koreaVisitItem);
 
 
     } catch (err) {
@@ -111,18 +110,48 @@ const getDetailData = async (index,item) => {
             }
         )
 
-        
-
         let detailItem = result.data['body']['article'][0]
-        console.log(`${index}.${item.title} \n`)
 
-        text += index+"."+item.title.trim()+" "+item.addr1+" "+item.tagName+" "+item.telNo+" "+detailItem.infoCenter+" "+detailItem.overView+" \n"
-        await koreaVisitItemWrite(text);
+        console.log(detailItem)
+
+        item.tagName = `#${item.tagName.replace(/\|/gi,"#")}`
         
-        // console.log(item)
+        try{
+            detailItem.overView = detailItem.overView.replace(/,/gi," ")
+            detailItem.overView = detailItem.overView.replace(/\n/gi," ")
+            detailItem.overView = detailItem.overView.replace(/\r/gi," ")
+            detailItem.overView = detailItem.overView.replace(/;/gi," ")
+            detailItem.overView = detailItem.overView.replace(/&nbsp/gi,"")
+            detailItem.overView = detailItem.overView.replace(/"/gi,"")
+            detailItem.overView = detailItem.overView.replace(/'/gi,"")
 
-        // let detailItemList = result.data['body']['article']
-        // console.log(result.data['body']['article'][0])
+            detailItem.overView = detailItem.overView.replace(/(<([^>]+)>)/gi,"");
+            
+            detailItem.overView = `${detailItem.overView}`
+        }catch(err){
+            detailItem.overView = "empty overview"
+            console.log(`${item.title} ==> undefined overview !!!!!!`)
+        }
+        
+        try{
+            detailItem.infoCenter = detailItem.infoCenter.replace(/,/gi," &")
+            detailItem.infoCenter = detailItem.infoCenter.replace(/<br>/gi," &")
+            detailItem.infoCenter = detailItem.infoCenter.replace(/\n/gi," ")
+        }catch(err){
+            detailItem.infoCenter = "empty infoCenter"
+            console.log(`${item.title} ==> undefined infoCenter !!!!!!`)
+        }
+        
+
+
+
+        if(index == 0){
+            text =`여행지이름,주소,태그,전화번호,홈페이지,영업일,OVERVIEW\n`
+        }
+
+        text += index+". "+item.title+","+item.addr1+","+item.tagName+","+detailItem.infoCenter+","+detailItem.homepage+","+detailItem.restDate+","+detailItem.overView+"\n"
+
+        
 
     } catch (err) {
         console.log(err)
@@ -147,11 +176,11 @@ async function koreaVisitItemWrite(text) {
 
     var fs = require('fs');
 
-    await fs.writeFile(`./한국관광공사.csv`, text, function (err) {
+    await fs.writeFile(`./한국관광공사.csv`, text, async function (err) {
         if (err) {
-            console.log(err)
+            await console.log(err)
         } else {
-            console.log(`PROCESS COMPLETED !!`)
+            await console.log(`PROCESS COMPLETED !!`)
         }
     })
 
@@ -161,8 +190,20 @@ async function koreaVisitItemWrite(text) {
 
 // 한국관광공사 크롤링 시작
 const startTask = async () => {
+    start = new Date().getTime();
     await getTotalCnt();
     await getKoreaVisitData(totalCnt);
+    // console.log(text)
+    await koreaVisitItemWrite(text);
+    elapsed = new Date().getTime() - start;
+
+    if(elapsed/1000 > 60){
+        minute = Math.round(elapsed/1000/60)
+        elapsed = elapsed/1000%60
+    }else{
+        minute = 0;
+    }
+    console.log(`크롤링 소요 시간 : ${ minute}분 ${(elapsed/1000).toFixed(2)}초`);
 }
 
 
