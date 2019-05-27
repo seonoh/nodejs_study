@@ -61,7 +61,7 @@ const getKoreaVisitData = async (cnt) => {
                 'locationy': "0",
                 'page': "1",
                 'cnt': `${cnt}`
-                // cnt: `1000`
+
             },
             headers: {
                 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.157 Safari/537.36',
@@ -115,53 +115,53 @@ const getDetailData = async (index, item) => {
 
         console.log(detailItem)
 
-        // item.title + "," + item.addr1 + "," + item.tagName + "," + detailItem.infoCenter + "," + 
-        // detailItem.homepage + "," + detailItem.restDate + "," +detailItem.imgPath+","+ detailItem.overView
-
         if(typeof(item.title) == 'undefined'){
             item.title = ''
+        }else{
+            item.title = item.title.replace(/,|\n|\r|;|\\|&nbsp|'|"|(<([^>]+)>)/gi," ")
         }
 
+       
         if(typeof(item.addr1) == 'undefined'){
             item.addr1 = ''
+        }else{
+            item.addr1 = item.addr1.replace(/,|\n|\r|;|\\|&nbsp|'|"|(<([^>]+)>)/gi," ")
         }
 
         if(typeof(item.tagName) == 'undefined'){
             item.tagName = ''
+        }else{
+            if(item.tagName ==''){
+
+            }else{
+                item.tagName = `#${item.tagName.replace(/\|/gi, "#")}`
+            }
         }
 
-        item.tagName = `#${item.tagName.replace(/\|/gi, "#")}`
-
+       
         if(typeof(detailItem.infoCenter) == 'undefiend'){
             detailItem.infoCenter = ''
+        }else{
+                detailItem.infoCenter = detailItem.infoCenter.replace(/,|\n|\r|;|\\|&nbsp|'|"|(<([^>]+)>)/gi," ")
         }
 
-        try {
-            detailItem.infoCenter = detailItem.infoCenter.replace(/,/gi, " &")
-            detailItem.infoCenter = detailItem.infoCenter.replace(/<br>/gi, " &")
-            detailItem.infoCenter = detailItem.infoCenter.replace(/\n/gi, " ")
-            detailItem.infoCenter = detailItem.infoCenter.replace(/(<([^>]+)>)/gi, "")
-        } catch (err) {
-            console.log(`${item.title} ==> undefined infoCenter !!!!!!`)
-        }
+        
 
         if(typeof(detailItem.homepage) == 'undefined'){
             detailItem.homepage = ''
+        }else{
+            detailItem.homepage = detailItem.homepage.replace(/,|\n|\r|;|\\|&nbsp|'|"|(<([^>]+)>)/gi," ")
         }
 
-
-        detailItem.homepage =detailItem.homepage.replace(/(<([^>]+)>)/gi, "");
-        detailItem.homepage = detailItem.homepage.replace(/\n/gi, " ")
-        detailItem.homepage = detailItem.homepage.replace(/\r/gi, " ")
+       
 
         if(typeof(detailItem.restDate) == 'undefined'){
             detailItem.restDate = ''
+        }else{
+            detailItem.restDate = detailItem.restDate.replace(/,|\n|\r|;|\\|&nbsp|'|"|(<([^>]+)>)/gi," ")
         }
 
-        detailItem.restDate = detailItem.restDate.replace(/(<([^>]+)>)/gi, "");
-        detailItem.restDate = detailItem.restDate.replace(/\r/gi, " ")
-        detailItem.restDate = detailItem.restDate.replace(/\n/gi, " ")
-        detailItem.restDate = detailItem.restDate.replace(/,/gi, " &")
+    
         
         if(typeof(detailItem.imgPath) == 'undefined'){
             detailItem.imgPath = ``
@@ -172,15 +172,11 @@ const getDetailData = async (index, item) => {
 
         if(typeof(detailItem.overView) == 'undefined'){
             detailItem.overView = ""
+        }else{
+            detailItem.overView = detailItem.overView.replace(/,|\n|\r|;|\\|&nbsp|'|"|(<([^>]+)>)/gi," ")
         }
 
-            detailItem.overView = detailItem.overView.replace(/,/gi, " ")
-            detailItem.overView = detailItem.overView.replace(/\n/gi, " ")
-            detailItem.overView = detailItem.overView.replace(/\r/gi, " ")
-            detailItem.overView = detailItem.overView.replace(/;/gi, " ")
-            detailItem.overView = detailItem.overView.replace(/&nbsp/gi, "")
-            detailItem.overView = detailItem.overView.replace(/(<([^>]+)>)/gi, "");
-
+            
         if (index == 0) {
             text = `여행지이름,주소,태그,전화번호,홈페이지,영업일,이미지,OVERVIEW\n`
         }
@@ -239,7 +235,7 @@ async function koreaVisitItemWrite(text) {
 
     var fs = require('fs');
 
-    await fs.writeFile(`./한국관광공사.csv`, text, async function (err) {
+    await fs.writeFile(`./한국관광공사테스트.csv`, text, async function (err) {
         if (err) {
             await console.log(err)
         } else {
