@@ -108,13 +108,16 @@ const getJeonJuDetailCulture = async (href) => {
 
     let cultureItemOverView = ci('#image_board > div.detail_content > div.detail_cont_txt').text()
 
-    console.log(`image : ${cultureItemImagePath}`)
+    
     console.log(`title : ${cultureItemTitle}`)
     console.log(`addr : ${cultureItemAddr}`)
     console.log(`tel : ${cultureItemTel}`)
     console.log(`homepage : ${cultureItemHome}`)
+    console.log(`image : ${cultureItemImagePath}`)
+    console.log(`overview : ${cultureItemOverView}`)
+    
     console.log(`================================================================================`)
-    // console.log(`overview : ${cultureItemOverView}`)
+    
 
 }
 
