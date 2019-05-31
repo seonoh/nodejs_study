@@ -31,6 +31,7 @@ const getMangoPlateData = async () => {
             $test.each(async function (i, item) {
                 $title = $(item).find(`div.list-restaurant-item`);
 
+
                 await $title.each(async function(i,item){
                     finalTitle = $(item).find(`.title`).text();
                     $rank = $(item).find(`figure > figcaption > div > strong`).text()

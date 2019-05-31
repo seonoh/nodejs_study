@@ -5,7 +5,7 @@ var mangoConfig = {
     headers: {
 
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.131 Safari/537.36',
-        'Content-Type' : 'application/x-www-form-urlencoded; charset=UTF-8',
+        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
         'Origin': 'https://www.mangoplate.com'
         // 'User-Agent' : 'PostmanRuntime/7.11.0',
         // 'Accept' : '*/*',
@@ -26,43 +26,62 @@ var mangoConfig = {
 //     }
 //   })
 
-async function test(item) {
+function test(item) {
 
-    await getDetailItem(item);
-} 
+    getDetailItem(item);
+
+}
 
 const getMangoPlateData = async () => {
     try {
 
         var data = await axiosModule('https://www.mangoplate.com/search/%EB%AA%85%EB%8F%99?keyword=%EB%AA%85%EB%8F%99&page=1', mangoConfig);
 
-        var $ = cheerioModule.load(data['data']);
+        var $ = cheerioModule.load(data['data'],async function(err,res){
+            $test = $(`body > main > article > div.column-wrapper > div > div > section > div.search-list-restaurants-inner-wrap > ul > li`);
 
-        $test = $(`body > main > article > div.column-wrapper > div > div > section > div.search-list-restaurants-inner-wrap > ul > li`);
-            
-            $test.each(async function (i, item) {
-                $title = $(item).find(`.title`);
+            $test.each( function (i, item) {
+                console.log(`${i}`);
+                $title = $(item).find(`h2.title`);
+                console.log(`${$title.text()}`)
+    
+                // array = JSON.stringify($title.text())
+    
+                
+                // console.log(`${$title.text().split(' ')}`)
+    
+                // array.each(function (i, item) {
+    
+                //     console.log(`@#@#@#@# ${item}`)
+                //     // console.log(`******** ---> ${item[i]}`)
+                // })
+                console.log(`\n`)
+    
                 $href = $(item).find(`figure > figcaption > div > a`).attr('href');
-
-                let mangoItem = new MangoItem( $title.text() ,$href );
-
+    
+                let mangoItem = new MangoItem($title.text(), $href);
+    
                 // await test(mangoItem.href);
-                await test(mangoItem);
-                // console.log(i + " -> " + $title.text());
-            
+                console.log(`${$title.text().split(' ',2)}`)
+                test(mangoItem);
+                // console.log(`mangoItem.title ${mangoItem.title} mangoItem.href : ${mangoItem.href}`);
+    
             });
+        });
+
+        
 
     } catch (err) {
         console.log(err);
     }
 }
 
-function MangoItem(title, href){
+function MangoItem(title, href) {
     this.title = title;
     this.href = href;
 }
 
-const getDetailItem = async(mangoItem) =>{
+const getDetailItem = async (mangoItem) => {
     try {
 
         // console.log(`${mangoItem.title}`)
@@ -75,7 +94,7 @@ const getDetailItem = async(mangoItem) =>{
 
         _detail = _('body > main > article > div.column-wrapper > div.column-contents > div > section.restaurant-detail > table > tbody');
 
-        _detail.each(function(i,item){
+        _detail.each(function (i, item) {
 
             address = _(item).find('tr.only-desktop>td').text();
             titlePhoneNum = _(item).find('tr.only-desktop>th').text();
@@ -84,14 +103,12 @@ const getDetailItem = async(mangoItem) =>{
             console.log(` 주소 : ${address}\n`);
 
         })
-        
 
-    
-    }catch(err){
+
+
+    } catch (err) {
         console.log(err);
     }
 }
 
 getMangoPlateData();
-
-

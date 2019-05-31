@@ -1,6 +1,8 @@
 let axiosModule = require('axios');
 let cheerioModule = require('cheerio');
 
+const REGEXP = /,|\n|\r|;|\\|&nbsp|'|"|(<([^>]+)>)/gi
+
 let totalCnt = '';
 
 let text = '';
@@ -45,7 +47,7 @@ const getTotalCnt = async () => {
 // 총 데이터의 개수만큼 데이터 크롤링 
 const getKoreaVisitData = async (cnt) => {
     let result = '';
-    
+
     try {
         result = await axiosModule({
             url: 'https://korean.visitkorea.or.kr/call',
@@ -61,6 +63,7 @@ const getKoreaVisitData = async (cnt) => {
                 'locationy': "0",
                 'page': "1",
                 'cnt': `${cnt}`
+                // 'cnt': `1`
 
             },
             headers: {
@@ -98,6 +101,7 @@ const getDetailData = async (index, item) => {
             {
                 url: 'https://korean.visitkorea.or.kr/call',
                 method: 'post',
+
                 data: {
                     'cmd': 'TOUR_CONTENT_BODY_VIEW',
                     'cotid': `${item.cotId}`,
@@ -111,86 +115,96 @@ const getDetailData = async (index, item) => {
             }
         )
 
-        let detailItem = result.data['body']['article'][0]
-
-        console.log(detailItem)
-
-        if(typeof(item.title) == 'undefined'){
-            item.title = ''
-        }else{
-            item.title = item.title.replace(/,|\n|\r|;|\\|&nbsp|'|"|(<([^>]+)>)/gi," ")
-        }
-
-       
-        if(typeof(item.addr1) == 'undefined'){
-            item.addr1 = ''
-        }else{
-            item.addr1 = item.addr1.replace(/,|\n|\r|;|\\|&nbsp|'|"|(<([^>]+)>)/gi," ")
-        }
-
-        if(typeof(item.tagName) == 'undefined'){
-            item.tagName = ''
-        }else{
-            if(item.tagName ==''){
-
-            }else{
-                item.tagName = `#${item.tagName.replace(/\|/gi, "#")}`
-            }
-        }
-
-       
-        if(typeof(detailItem.infoCenter) == 'undefiend'){
-            detailItem.infoCenter = ''
-        }else{
-                detailItem.infoCenter = detailItem.infoCenter.replace(/,|\n|\r|;|\\|&nbsp|'|"|(<([^>]+)>)/gi," ")
-        }
-
-        
-
-        if(typeof(detailItem.homepage) == 'undefined'){
-            detailItem.homepage = ''
-        }else{
-            detailItem.homepage = detailItem.homepage.replace(/,|\n|\r|;|\\|&nbsp|'|"|(<([^>]+)>)/gi," ")
-        }
-
-       
-
-        if(typeof(detailItem.restDate) == 'undefined'){
-            detailItem.restDate = ''
-        }else{
-            detailItem.restDate = detailItem.restDate.replace(/,|\n|\r|;|\\|&nbsp|'|"|(<([^>]+)>)/gi," ")
-        }
-
-    
-        
-        if(typeof(detailItem.imgPath) == 'undefined'){
-            detailItem.imgPath = ``
-        }else{
-            detailItem.imgPath = `https://support.visitkorea.or.kr/img/call?cmd=VIEW&id=${detailItem.imgPath}`
-        }
-
-
-        if(typeof(detailItem.overView) == 'undefined'){
-            detailItem.overView = ""
-        }else{
-            detailItem.overView = detailItem.overView.replace(/,|\n|\r|;|\\|&nbsp|'|"|(<([^>]+)>)/gi," ")
-        }
-
-            
-        if (index == 0) {
-            text = `여행지이름,주소,태그,전화번호,홈페이지,영업일,이미지,OVERVIEW\n`
-        }
-        
-        text += index + ". " + item.title + "," + item.addr1 + "," + item.tagName + "," + detailItem.infoCenter + "," + detailItem.homepage + "," + detailItem.restDate + "," +detailItem.imgPath+","+ detailItem.overView + "\n"
-    
-        await getDetailImageData(item.cotId)
-
-
     } catch (err) {
         console.log(err)
         return;
     }
+
+    let detailItem = result.data['body']['article'][0]
+
+    console.log(detailItem)
+    try {
+        if (typeof (item.title) == undefined) {
+            item.title = ''
+        } else {
+            item.title = item.title.replace(REGEXP, " ")
+        }
+
+
+        if (typeof (item.addr1) == 'undefined') {
+            item.addr1 = ''
+        } else {
+            item.addr1 = item.addr1.replace(REGEXP, " ")
+        }
+
+        if (typeof (item.tagName) == 'undefined') {
+            item.tagName = ''
+        } else {
+            if (item.tagName == '') {
+
+            } else {
+                item.tagName = `#${item.tagName.replace(/\|/gi, "#")}`
+            }
+        }
+
+        try {
+            if (typeof (detailItem.infoCenter) == 'undefiend') {
+                detailItem.infoCenter = ''
+            } else {
+                detailItem.infoCenter = detailItem.infoCenter.replace(REGEXP, " ")
+            }
+        } catch (err) {
+            if (typeof (detailItem.telNo) == 'undefiend') {
+                detailItem.infoCenter = ''
+            } else {
+                detailItem.infoCenter = detailItem.telNo.replace(REGEXP, " ")
+            }
+        }
+
+
+        if (typeof (detailItem.homepage) == 'undefined') {
+            detailItem.homepage = ''
+        } else {
+            detailItem.homepage = detailItem.homepage.replace(REGEXP, " ")
+        }
+
+        if (typeof (detailItem.restDate) == 'undefined') {
+            detailItem.restDate = ''
+        } else {
+            detailItem.restDate = detailItem.restDate.replace(REGEXP, " ")
+        }
+
+        if (typeof (detailItem.imgPath) == 'undefined') {
+            detailItem.imgPath = ``
+        } else {
+            detailItem.imgPath = `https://support.visitkorea.or.kr/img/call?cmd=VIEW&id=${detailItem.imgPath}`
+        }
+
+
+        if (typeof (detailItem.overView) == 'undefined') {
+            detailItem.overView = ""
+        } else {
+            detailItem.overView = detailItem.overView.replace(REGEXP, " ")
+        }
+
+    } catch (err) {
+        console.log(err)
+    }
+
+
+    if (index == 0) {
+        text = `이름,주소,태그,전화번호,홈페이지,운영시간,이미지,소개\n`
+    }
+
+    text += index + ". " + item.title + "," + item.addr1 + "," + item.tagName + "," + detailItem.infoCenter + "," + detailItem.homepage + "," + detailItem.restDate + "," + detailItem.imgPath + "," + detailItem.overView + "\n"
+
+    await getDetailImageData(item.cotId)
+
+
 }
+
+
+
 
 const getDetailImageData = async (id) => {
     let result = '';
@@ -213,7 +227,7 @@ const getDetailImageData = async (id) => {
         // console.log(imageItem)
 
 
-    }catch(err){
+    } catch (err) {
         console.log(err)
     }
 }
@@ -231,11 +245,9 @@ const getDetailImageData = async (id) => {
 
 async function koreaVisitItemWrite(text) {
 
-
-
     var fs = require('fs');
 
-    await fs.writeFile(`./한국관광공사테스트.csv`, text, async function (err) {
+    await fs.writeFile(`./한국관광공사FINAL.csv`, text, async function (err) {
         if (err) {
             await console.log(err)
         } else {
