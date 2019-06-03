@@ -1,36 +1,66 @@
 let axiosModule = require('axios');
-let cheerioModule = require('cheerio');
-
-const REGEXP = /,|\n|\r|;|\\|&nbsp|'|"|(<([^>]+)>)/gi
-
+let util = require('../util')
 let totalCnt = '';
+let koreaVisitDataItemList = [];
 
-let text = '';
+const KOREA_VISIT_URL = 'https://korean.visitkorea.or.kr/call'
+const INIT_ITEM = util.createCrawalingModel('인덱스', '이름', '주소', '태그', '전화번호', '홈페이지', '운영시간/휴무일', '이미지', '입장료', '주차시설', '소개\n')
+koreaVisitDataItemList.push(INIT_ITEM)
+
+const CREATE_VISIT_DATA_CONFIG = (cnt)=> {
+
+    var config = {
+        url: KOREA_VISIT_URL,
+        method: 'post',
+        data: {
+            'cmd': 'TOUR_CONTENT_LIST_VIEW',
+            'month': "All",
+            'areaCode': "All",
+            'sigunguCode': "All",
+            'tagId': "All",
+            'sortkind': "1",
+            'locationx': "0",
+            'locationy': "0",
+            'page': "1",
+            'cnt': `${cnt}`
+            // 'cnt': `1`
+
+        },
+        headers: {
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.157 Safari/537.36',
+            'Content-type': 'application/x-www-form-urlencoded'
+        }
+    }
+
+    return config
+
+}
+
+const VISIT_DETAIL_DATA_CONFIG = (contentsId)=>{
+    let config = {
+        url: KOREA_VISIT_URL,
+        method: 'post',
+        data: {
+            'cmd': 'TOUR_CONTENT_BODY_VIEW',
+            'cotid': `${contentsId}`,
+            'locationx': "0",
+            'locationy': "0"
+        },
+        headers: {
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.157 Safari/537.36',
+            'Content-type': 'application/x-www-form-urlencoded'
+        }
+    }
+    return config
+}
 
 // 총 데이터의 개수 함수
 const getTotalCnt = async () => {
     let koreaData = {}
     try {
-        koreaData = await axiosModule({
-            url: 'https://korean.visitkorea.or.kr/call',
-            method: 'post',
-            data: {
-                'cmd': 'TOUR_CONTENT_LIST_VIEW',
-                'month': "All",
-                'areaCode': "All",
-                'sigunguCode': "All",
-                'tagId': "All",
-                'sortkind': "1",
-                'locationx': "0",
-                'locationy': "0",
-                'page': "1",
-                'cnt': "1"
-            },
-            headers: {
-                'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.157 Safari/537.36',
-                'Content-type': 'application/x-www-form-urlencoded'
-            }
-        })
+        koreaData = await axiosModule(
+            CREATE_VISIT_DATA_CONFIG(1)
+        )
 
         totalCnt = koreaData.data['body']['totalCount']
 
@@ -49,45 +79,26 @@ const getKoreaVisitData = async (cnt) => {
     let result = '';
 
     try {
-        result = await axiosModule({
-            url: 'https://korean.visitkorea.or.kr/call',
-            method: 'post',
-            data: {
-                'cmd': 'TOUR_CONTENT_LIST_VIEW',
-                'month': "All",
-                'areaCode': "All",
-                'sigunguCode': "All",
-                'tagId': "All",
-                'sortkind': "1",
-                'locationx': "0",
-                'locationy': "0",
-                'page': "1",
-                'cnt': `${cnt}`
-                // 'cnt': `1`
-
-            },
-            headers: {
-                'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.157 Safari/537.36',
-                'Content-type': 'application/x-www-form-urlencoded'
-            }
-        })
-
-        let koreaVisitItem = result.data['body']['result']
-
-        console.log(`크롤링 데이터 TotalCount : ${cnt}`)
-
-        for (let i = 0; i < koreaVisitItem.length; i++) {
-
-            await getDetailData(i, koreaVisitItem[i])
-            console.log(`크롤링 진행도 : ${i}/${cnt}`)
-        }
-
-
-
+        result = await axiosModule(
+            CREATE_VISIT_DATA_CONFIG(cnt)
+        )
     } catch (err) {
         console.log(err)
-        return;
     }
+
+    let koreaVisitItem = result.data['body']['result']
+
+    console.log(`크롤링 데이터 TotalCount : ${cnt}`)
+
+    for (let i = 0; i < koreaVisitItem.length; i++) {
+
+        await getDetailData(i, koreaVisitItem[i])
+        console.log(`크롤링 진행도 : ${i}/${cnt}`)
+    }
+
+
+
+
 
 
 }
@@ -98,168 +109,179 @@ const getDetailData = async (index, item) => {
 
     try {
         result = await axiosModule(
-            {
-                url: 'https://korean.visitkorea.or.kr/call',
-                method: 'post',
-
-                data: {
-                    'cmd': 'TOUR_CONTENT_BODY_VIEW',
-                    'cotid': `${item.cotId}`,
-                    'locationx': "0",
-                    'locationy': "0"
-                },
-                headers: {
-                    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.157 Safari/537.36',
-                    'Content-type': 'application/x-www-form-urlencoded'
-                }
-            }
+            VISIT_DETAIL_DATA_CONFIG(item.cotId)
         )
 
     } catch (err) {
-        console.log(err)
+        console.log(`ERROR === >> \n${err}`)
         return;
     }
 
     let detailItem = result.data['body']['article'][0]
 
     console.log(detailItem)
+
+
+    let title = ''
+    let addr = ''
+    let tag = ''
+    let telNum = ''
+    let homepage = ''
+    let restDate = ''
+    let imgPath = ''
+    let enterCharge = ''
+    let parkInfo = ''
+    let overView = ''
+
+    //값 유무 판별, 
+    //ex)detailItem.infoCenter의 경우 tel,telNo 형식으로 오는 경우 예외 처리
+    //질문 여기서 detailItem JSON Object인데,
+    //detailItem에 infoCenter가 존재하지 않았을 때 undefiend처리를 해주어도 에러가 발생하는이유
+    //데이터가 없는데 불러왔으면 null이 떠야하는 것이 아닌지.
+
     try {
         if (typeof (item.title) == undefined) {
-            item.title = ''
+            title = ''
         } else {
-            item.title = item.title.replace(REGEXP, " ")
+            title = item.title
         }
 
 
         if (typeof (item.addr1) == 'undefined') {
-            item.addr1 = ''
+            addr = ''
         } else {
-            item.addr1 = item.addr1.replace(REGEXP, " ")
+            addr = item.addr1
         }
 
         if (typeof (item.tagName) == 'undefined') {
-            item.tagName = ''
+            tag = ''
         } else {
             if (item.tagName == '') {
 
             } else {
-                item.tagName = `#${item.tagName.replace(/\|/gi, "#")}`
+                tag = item.tagName
             }
         }
 
         try {
             if (typeof (detailItem.infoCenter) == 'undefiend') {
-                detailItem.infoCenter = ''
+                telNum = ''
             } else {
-                detailItem.infoCenter = detailItem.infoCenter.replace(REGEXP, " ")
+                telNum = detailItem.infoCenter
             }
         } catch (err) {
-            if (typeof (detailItem.telNo) == 'undefiend') {
-                detailItem.infoCenter = ''
-            } else {
-                detailItem.infoCenter = detailItem.telNo.replace(REGEXP, " ")
-            }
-        }
-
-
-        if (typeof (detailItem.homepage) == 'undefined') {
-            detailItem.homepage = ''
-        } else {
-            detailItem.homepage = detailItem.homepage.replace(REGEXP, " ")
-        }
-
-        if (typeof (detailItem.restDate) == 'undefined') {
-            detailItem.restDate = ''
-        } else {
-            detailItem.restDate = detailItem.restDate.replace(REGEXP, " ")
-        }
-
-        if (typeof (detailItem.imgPath) == 'undefined') {
-            detailItem.imgPath = ``
-        } else {
-            detailItem.imgPath = `https://support.visitkorea.or.kr/img/call?cmd=VIEW&id=${detailItem.imgPath}`
-        }
-
-
-        if (typeof (detailItem.overView) == 'undefined') {
-            detailItem.overView = ""
-        } else {
-            detailItem.overView = detailItem.overView.replace(REGEXP, " ")
-        }
-
-    } catch (err) {
-        console.log(err)
-    }
-
-
-    if (index == 0) {
-        text = `이름,주소,태그,전화번호,홈페이지,운영시간,이미지,소개\n`
-    }
-
-    text += index + ". " + item.title + "," + item.addr1 + "," + item.tagName + "," + detailItem.infoCenter + "," + detailItem.homepage + "," + detailItem.restDate + "," + detailItem.imgPath + "," + detailItem.overView + "\n"
-
-    await getDetailImageData(item.cotId)
-
-
-}
-
-
-
-
-const getDetailImageData = async (id) => {
-    let result = '';
-
-    try {
-        result = await axiosModule(
-            {
-                url: `https://korean.visitkorea.or.kr/detail/ms_detail.do?cotid=${id}`,
-                method: 'get',
-                headers: {
-                    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.157 Safari/537.36',
-                    'Content-type': 'application/x-www-form-urlencoded'
+            try {
+                if (typeof (detailItem.tel) == 'undefiend') {
+                    telNum = ''
+                } else {
+                    telNum = detailItem.tel
+                }
+            } catch (err) {
+                try {
+                    if (typeof (detailItem.telNo) == 'undefiend') {
+                        telNum = ''
+                    } else {
+                        telNum = detailItem.telNo
+                    }
+                } catch (err) {
+                    telNum = ''
                 }
             }
-        )
-        // console.log(`result ===>> ${result[`data`]}`)
-        var htmlData = cheerioModule.load(result[`data`]);
 
-        var imageItem = await htmlData(`#contents > div:nth-child(3) > div.area_imgView_wrap > div.area_imgView > ul`)
-        // console.log(imageItem)
+        }
+
+
+        try {
+            if (typeof (detailItem.homepage) == 'undefined') {
+                homepage = ''
+            } else {
+                homepage = detailItem.homepage
+            }
+        } catch (err) {
+            try {
+                if (typeof (detailItem.reservationUrl) == 'undefined') {
+                    homepage = ''
+                } else {
+                    homepage = detailItem.reservationUrl
+                }
+            } catch (err) {
+                homepage = ''
+            }
+
+
+        }
+
+
+        try {
+            if (typeof (detailItem.restDate) == 'undefined') {
+                restDate = ''
+            } else {
+                restDate = detailItem.restDate
+            }
+        } catch (err) {
+            restDate = ''
+        }
+
+        try {
+            if (typeof (detailItem.imgPath) == 'undefined') {
+                imgPath = ``
+            } else {
+                if(detailItem.imgPath == null | detailItem.imgPath ==""){
+                    imgPath = ''
+                }else{
+                    imgPath = `https://support.visitkorea.or.kr/img/call?cmd=VIEW&id=${detailItem.imgPath}`
+                }
+            }
+        } catch (err) {
+            imgPath = ''
+        }
+
+
+        try {
+            if (typeof (detailItem.parking) == 'undefined') {
+                parkInfo = ``
+            } else {
+                parkInfo = detailItem.parking
+            }
+        } catch (err) {
+            parkInfo = ''
+        }
+
+
+
+
+        try {
+            if (typeof (detailItem.overView) == 'undefined') {
+                overView = ""
+            } else {
+                overView = detailItem.overView
+            }
+        } catch (err) {
+            overView = ""
+        }
+
 
 
     } catch (err) {
         console.log(err)
     }
-}
 
+    item = util.createCrawalingModel(
+        index,
+        title,
+        addr,
+        tag,
+        telNum,
+        homepage,
+        restDate,
+        imgPath,
+        enterCharge,
+        parkInfo,
+        overView)
 
-// cotId,addr2,distance,addr1,sigunguCode,title,tagName,
-// telNo,areaCode,viewCnt,imgPath,contentType,cid,
-
-// parking,distance,tagId,infoCenter,title,mapY,contentStatus,
-// mapX,overView,areaName,sigunguName,useTime,tel,contentType,
-// cotId,addr2,addr1,sigunguCode,dept,tagName,telNo,
-// setStatus,areaCode,heritage3,heritage2,heritage1,
-// imgPath,restDate,imgAlt,cid,deptView,homepage,useCash
-
-
-async function koreaVisitItemWrite(text) {
-
-    var fs = require('fs');
-
-    await fs.writeFile(`./한국관광공사FINAL.csv`, text, async function (err) {
-        if (err) {
-            await console.log(err)
-        } else {
-            await console.log(`PROCESS COMPLETED !!`)
-        }
-    })
-
-
+    koreaVisitDataItemList.push(item)
 
 }
-
-
 
 // 한국관광공사 크롤링 시작
 const startTask = async () => {
@@ -268,16 +290,8 @@ const startTask = async () => {
     await getKoreaVisitData(totalCnt);
     console.log("crawaling data is loaded..")
     console.log("crawaling data writing..")
-    await koreaVisitItemWrite(text);
-    elapsed = new Date().getTime() - start;
-
-    if (elapsed / 1000 > 60) {
-        minute = Math.round(elapsed / 1000 / 60)
-        elapsed = elapsed / 1000 % 60
-    } else {
-        minute = 0;
-    }
-    console.log(`크롤링 소요 시간 : ${minute}분 ${(elapsed / 1000).toFixed(2)}초`);
+    await util.writeData('한국관공공사리펙토링버전', koreaVisitDataItemList)
+    util.calcurlateTime(start,"크롤링 소요 시간")
 }
 
 
