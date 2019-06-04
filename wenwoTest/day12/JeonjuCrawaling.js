@@ -207,5 +207,5 @@ exports.startJeonJuCrawaling = async() => {
     return jeonjuItemList;
 
 }
-
-this.startJeonJuCrawaling()
+// exports하면 한번 실행되기 때문에 주석
+// this.startJeonJuCrawaling()

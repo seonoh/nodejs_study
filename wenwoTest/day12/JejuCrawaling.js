@@ -46,6 +46,8 @@ const getJeJuPageCnt = async (url) => {
 
 
     jejuTotalCnt = pageResult['data']['totalCount'];
+    console.log(`TOTAL_COUNT : ${jejuTotalCnt}`)
+
     return jejuTotalCnt;
 
 
@@ -56,15 +58,12 @@ const getJeJuData = async (totalCnt,curUrl) => {
     let jejuResult = '';
     let useUrl = curUrl.replace(/pageSize=\d*/,`pageSize=${totalCnt}`)
 
-    console.log(`TOTAL_COUNT : ${totalCnt}`)
 
     try {
         jejuResult = await axiosModule(JEJU_CONFIG(useUrl))
 
     } catch (err) {
         console.log(`getJeJuData ERROR --->> ${err}`)
-        console.log(`getJeJuData retry...`)
-
 
     }
     let jejuDataList = jejuResult['data']['items']
@@ -80,9 +79,6 @@ const getJeJuData = async (totalCnt,curUrl) => {
         }catch(err){
             imgPath = ''
         }
-        
-        
-        
             let item = util.createCrawalingModel(
                 `${curSequence}`,
                 jejuDataList[i].title,
@@ -100,7 +96,7 @@ const getJeJuData = async (totalCnt,curUrl) => {
         jejuResulItemtList.push(item)
 
         curSequence++;
-
+        console.log(`${i}/${jejuDataList.length}`)
     }
 
 
@@ -111,13 +107,19 @@ const getJeJuData = async (totalCnt,curUrl) => {
 
 exports.startJeJuCrawaling = async() => {
     // start = new Date().getTime(); 
+    console.log(`========================================`)
+    console.log(`startJeJuCrawaling !!`)
     await getJeJuData(await getJeJuPageCnt(JEJU_MAIN_URL),JEJU_MAIN_URL)
     await getJeJuData(await getJeJuPageCnt(JEJU_FOOD_URL),JEJU_FOOD_URL)
     await getJeJuData(await getJeJuPageCnt(JEJU_LODGMENT_URL),JEJU_LODGMENT_URL)
     await getJeJuData(await getJeJuPageCnt(JEJU_SHOPPING_URL),JEJU_SHOPPING_URL)
     // util.calcurlateTime(start,'크롤링')
-    console.log(jejuResulItemtList)
+    // console.log(jejuResulItemtList)
     // await util.writeData('제주여행정보중국어버전',jejuResulItemtList)
+    console.log(`endJejuCrawaling !!`)
+    console.log(`========================================`)
+
+
     return jejuResulItemtList
 
     // util.writeData("제주여행정보",jejuResulItemtList)
@@ -126,5 +128,6 @@ exports.startJeJuCrawaling = async() => {
 
 }
 
-this.startJeJuCrawaling()
+// exports하면 한번 실행되기 때문에 주석
+// this.startJeJuCrawaling()
 

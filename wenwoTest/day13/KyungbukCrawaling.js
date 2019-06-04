@@ -13,7 +13,7 @@ const KYUNGBUK_ALL_URL = 'http://tour.gb.go.kr/gbtour/page.do?pageNo=1&pageSize=
 
 
 const getPageCnt = async (url) => {
-    let result = await requestModule.networkRequest(url)
+    let result = await requestModule.networkGetRequest(url)
     let data = cheerioModule.load(result)
     let totalPage = data('#contents > div > div.stroy-list > div.webzine-list.add-info > div.paging-wrap > a.arr.end').attr('href')
     let totalPageCnt = totalPage.split('?')[1].split('&')[0].replace(/[^0-9]*/, "")
@@ -29,7 +29,7 @@ const getData = async (totalCnt) => {
         console.log(`===============================================================================`)
 
         let useUrl = KYUNGBUK_ALL_URL.replace(/pageNo=\d*/gi, `pageNo=${i}`)
-        let data = await requestModule.networkRequest(useUrl)
+        let data = await requestModule.networkGetRequest(useUrl)
         let ci = cheerioModule.load(data)
 
         let natureItemList = ci('#contents > div > div.stroy-list > div.webzine-list.add-info > ul > li')
@@ -47,7 +47,7 @@ const getData = async (totalCnt) => {
 
 const getNatureDetailData = async (url, sendedTag) => {
     // console.log(url)
-    let result = await requestModule.networkRequest(url)
+    let result = await requestModule.networkGetRequest(url)
     let ci = cheerioModule.load(result)
 
         base = ci('#contents > div > div.view-wrap > div.view-con > div.con-info > div > table > tbody')
@@ -64,7 +64,9 @@ const getNatureDetailData = async (url, sendedTag) => {
         imgPath = 'http://tour.gb.go.kr' + ci('#view_con_img > div > div >img').attr('src')
         overView = ci('#v-1 > p').text()
 
-        item = util.createCrawalingModel(curSequence, name, addr, tag, phone, homepage, restDate, imgPath, overView)
+        item = util.createCrawalingModel(
+            curSequence, name, addr, tag, phone, homepage,
+             restDate, imgPath,"","" ,overView)
 
     kyungbukItemList.push(item)
     console.log(item)
@@ -83,5 +85,5 @@ exports.startKyungbukCrawaling = async () => {
     return kyungbukItemList
 
 }
-
-this.startKyungbukCrawaling()
+// exports하면 한번 실행되기 때문에 주석
+// this.startKyungbukCrawaling()

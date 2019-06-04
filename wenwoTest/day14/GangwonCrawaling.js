@@ -105,6 +105,6 @@ exports.startGangwonCrawaling = async () => {
     return gangwonItemList;
     // util.calcurlateTime(start, "Gangwon Crawaling")
 }
-
-this.startGangwonCrawaling()
+// exports하면 한번 실행되기 때문에 주석
+// this.startGangwonCrawaling()
 

@@ -72,7 +72,7 @@ exports.translateLangRequest = async (config) => {
 
     }
 
-    return result['data'];
+    return result['data']['text'];
 
 }
 

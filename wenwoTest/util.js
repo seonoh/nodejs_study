@@ -115,39 +115,9 @@ const itemValidCheck = (attr, type = 'default') => {
     return attr;
 }
 
-const PAPAGO_CONFIG = (beforeLang,afterLang,text)=>{
-    let config = {
-        'method' : 'post',
-        'url' : 'https://naveropenapi.apigw.ntruss.com/nmt/v1/translation',
-        'headers':{
 
-            'X-NCP-APIGW-API-KEY-ID' : 's49sck7gvq',
-            'X-NCP-APIGW-API-KEY' : 'UOQjFu6kHlzL8XTtWj6iHFg8TBD2VYf2OeYRTio0'
-        },
-        data : {
-            'source' : beforeLang,
-            'target' : afterLang,
-            'text' : text
-        }
-    }
-    return config;
-}
 
-exports.translateLang = async (beforeLang,afterLang,text)=>{
 
-    let result = ''
-
-    try{
-        result = await customRequestModule.translateLangRequest(PAPAGO_CONFIG(beforeLang,afterLang,text))
-    }catch(err){
-        console.log(`TRANSLATE LANG ERROR ===>${err}`)
-    }
-
-    console.log(`BEFORE : ${text}\nAFTER : ${result['message']['result']['translatedText']}`)
-    console.log(`====================================================`)
-    
-    return result['message']['result']['translatedText'];
-}
 
 // 여행지이름, 주소, 태그,전화번호, 홈페이지, 영업일, 이미지, 소개
 exports.createCrawalingModel = (sequence, name, addr, tag, phone, homepage,
