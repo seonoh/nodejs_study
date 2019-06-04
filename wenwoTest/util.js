@@ -1,10 +1,11 @@
 //엑셀 양식에 맞춰 넣기 위해 정규식을 사용하여 문자열 대체
 const REGEXP = /\t|,|\n|\r|;|\\|&nbsp|'|"|(<([^>]+)>)/gi
-const TAG_REGEXP = /\/|,|\./gi
+const TAG_REGEXP = /\/|,|\.|\|/gi
+const customRequestModule = require('../wenwoTest/netRequest.js')
 // const TEL_REGEXP = /\/|' '|,/gi
 
 
-exports.calcurlateTime = (startTime,msg) => {
+exports.calcurlateTime = (startTime, msg) => {
     let elapsed = new Date().getTime() - startTime;
 
     if (elapsed / 1000 > 60) {
@@ -25,7 +26,7 @@ exports.writeData = async (fileName, itemList) => {
 
     for (var i = 0; i < itemList.length; i++) {
         result += itemList[i].sequence + "," + itemList[i].name + "," + itemList[i].addr + "," + itemList[i].tag
-            + "," + itemList[i].phone + "," + itemList[i].homepage + "," + itemList[i].restDate + "," + itemList[i].imgPath + "," + itemList[i].enterCharge+","+ itemList[i].parkInfo+","+itemList[i].overView + "\n"
+            + "," + itemList[i].phone + "," + itemList[i].homepage + "," + itemList[i].restDate + "," + itemList[i].imgPath + "," + itemList[i].enterCharge + "," + itemList[i].parkInfo + "," + itemList[i].overView + "\n"
     }
 
     // console.log(result)
@@ -38,6 +39,8 @@ exports.writeData = async (fileName, itemList) => {
         }
     })
 }
+
+
 
 //엑셀 양식별 저장을 위한 문자열 유효성 검사.
 const itemValidCheck = (attr, type = 'default') => {
@@ -52,25 +55,20 @@ const itemValidCheck = (attr, type = 'default') => {
         }
 
         if (type == 'tag') {
-            if (typeof (attr) == 'string') {
-                // attr = attr.replace(REGEXP,"")
-                if(attr.trim() == ''){
+
+                if (typeof (attr) == 'string') {
+                    if (attr.trim() == '') {
+                        attr = ''
+                    } else {
+                        attr = attr.trim()
+                        attr = `#${attr.replace(TAG_REGEXP, "#")}`
+                    }
+                } else {
                     attr = ''
-                }else{
-
-
-                    attr = attr.trim()
-                    attr = `#${attr.replace(TAG_REGEXP, "#")}`
-
-
-
                 }
-            }else{
-                attr = ''
-            }
-            return attr;
-
-
+                return attr;
+            
+        
         } else if (type == 'tel') {
 
 
@@ -84,7 +82,7 @@ const itemValidCheck = (attr, type = 'default') => {
                     attr = `(+82)${attr}`
                 }
 
-                attr = attr.replace(REGEXP,"")
+                attr = attr.replace(REGEXP, "")
                 return attr
             }
 
@@ -110,20 +108,61 @@ const itemValidCheck = (attr, type = 'default') => {
         }
     } catch (err) {
         attr = '';
-        console.log(`attr : ${attr} type : ${typeof (attr)} ERROR !!!`)
+        console.log(`attr : ${attr} type : ${typeof (attr)} ERROR !!!\n${err}`)
         return attr;
     }
 
     return attr;
 }
 
+const PAPAGO_CONFIG = (beforeLang,afterLang,text)=>{
+    let config = {
+        'method' : 'post',
+        'url' : 'https://naveropenapi.apigw.ntruss.com/nmt/v1/translation',
+        'headers':{
+
+            'X-NCP-APIGW-API-KEY-ID' : 's49sck7gvq',
+            'X-NCP-APIGW-API-KEY' : 'UOQjFu6kHlzL8XTtWj6iHFg8TBD2VYf2OeYRTio0'
+        },
+        data : {
+            'source' : beforeLang,
+            'target' : afterLang,
+            'text' : text
+        }
+    }
+    return config;
+}
+
+exports.translateLang = async (beforeLang,afterLang,text)=>{
+
+    let result = ''
+
+    try{
+        result = await customRequestModule.translateLangRequest(PAPAGO_CONFIG(beforeLang,afterLang,text))
+    }catch(err){
+        console.log(`TRANSLATE LANG ERROR ===>${err}`)
+    }
+
+    console.log(`BEFORE : ${text}\nAFTER : ${result['message']['result']['translatedText']}`)
+    console.log(`====================================================`)
+    
+    return result['message']['result']['translatedText'];
+}
+
 // 여행지이름, 주소, 태그,전화번호, 홈페이지, 영업일, 이미지, 소개
-exports.createCrawalingModel = (sequence, name, addr, tag, phone, homepage, restDate, imgPath,enterCharge="",parkInfo="", overView) => {
+exports.createCrawalingModel = (sequence, name, addr, tag, phone, homepage,
+     restDate, imgPath, enterCharge, parkInfo, overView) => {
     let model = new Object()
     model.sequence = itemValidCheck(sequence)
     model.name = itemValidCheck(name)
     model.addr = itemValidCheck(addr)
-    model.tag = itemValidCheck(tag, 'tag')
+    if(sequence == '인덱스'){
+        model.tag = itemValidCheck(tag, 'tag')
+        model.tag = model.tag.replace(/#/gi,"")
+    }else{
+        model.tag = itemValidCheck(tag, 'tag')
+
+    }
     model.phone = itemValidCheck(`${phone}`, 'tel')
     model.homepage = itemValidCheck(homepage)
     model.restDate = itemValidCheck(restDate)

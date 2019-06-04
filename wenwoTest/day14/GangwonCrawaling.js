@@ -13,7 +13,7 @@ let gangwonItemList = [];
 gangwonItemList.push(INIT_ITEM)
 
 const getTourItemCnt = async (url) => {
-    let tourResult = await customRequestModule.networkRequest(url)
+    let tourResult = await customRequestModule.networkGetRequest(url)
     let ci = cheerioModule.load(tourResult)
     let totalCnt = ci('#A-Contents > div > section > section > p > span').text().replace("건", '')
     console.log(`TOTAL_COUNT -- >> ${totalCnt}`)
@@ -55,7 +55,7 @@ const getTourItemData = async (url, pageNum) => {
 const getDetailItemData = async (sendedHref, sendedImgPath) => {
     let detailResult = ''
     try {
-        detailResult = await customRequestModule.networkRequest(sendedHref)
+        detailResult = await customRequestModule.networkGetRequest(sendedHref)
     } catch (err) {
         console.log(`getDetailItemData ERROR =====>>>>  ${err}`)
         return;
@@ -90,19 +90,21 @@ const startCrawaling = async (url) => {
         await getTourItemData(url, i)
     }
 
-    await util.writeData("강원도여행정보", gangwonItemList)
 
 }
 
-const startTask = async () => {
+
+exports.startGangwonCrawaling = async () => {
     start = new Date().getTime();
     await startCrawaling(GANGWON_TOUR_URL)
     await startCrawaling(GANGWON_TEMPLESTAY_URL)
     await startCrawaling(GANGWON_FIRM_URL)
     await startCrawaling(GANGWON_ACCOMMODATION_URL)
-    util.calcurlateTime(start, "Gangwon Crawaling")
+    // await util.writeData("강원도여행정보", gangwonItemList)
 
+    return gangwonItemList;
+    // util.calcurlateTime(start, "Gangwon Crawaling")
 }
 
-startTask()
+this.startGangwonCrawaling()
 

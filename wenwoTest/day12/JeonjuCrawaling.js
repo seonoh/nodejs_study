@@ -2,14 +2,17 @@
 //이름, 주소, 연락처, 홈페이지, 태그
 let axiosModule = require('axios')
 let cheerioModule = require('cheerio');
+let util = require('../util.js')
 
 //엑셀 양식별 저장을 위한 아이템 순서.
-let item_sequence = 0;
+let item_sequence = 1;
 
 //현재 태그 정보
 let curTag = ''
 
-
+let jeonjuItemList = []
+const INIT_ITEM = util.createCrawalingModel('인덱스', '이름', '주소', '태그', '전화번호', '홈페이지', '운영시간/휴무일', '이미지', '입장료', '주차시설', '소개\n')
+jeonjuItemList.push(INIT_ITEM)
 
 //엑셀 양식에 맞춰 넣기 위해 정규식을 사용하여 문자열 대체
 const REGEXP = /,|\n|\r|;|\\|&nbsp|'|"|(<([^>]+)>)/gi
@@ -66,7 +69,7 @@ const getJeonJuCulturePageCnt = async (jeonjuFirstUrl) => {
     let ci = cheerioModule.load(pageResult['data'])
     //현재 위치(cur.num 제외)
     let pageList = ci('#pagingNav>a.num,a.cur_num')
-    console.log(`${jeonjuFirstUrl}`)
+    // console.log(`${jeonjuFirstUrl}`)
     console.log(`PAGE == > ${pageList.length} crawaling start`)
 
 
@@ -142,58 +145,22 @@ const getJeonJuDetailCulture = async (href) => {
     let cultureItem = detailItem.find('li:nth-child(2) > ul')
 
     
-    let cultureItemTitle = itemValidCheck(cultureItem.find('li.image_board_detail_title').text().trim())
-    let cultureItemAddr = itemValidCheck(cultureItem.find('span.address~strong').text())
+    let cultureItemTitle = cultureItem.find('li.image_board_detail_title').text().trim()
+    let cultureItemAddr = cultureItem.find('span.address~strong').text()
     let cultureItemTag = curTag
-    let cultureItemTel = itemValidCheck(cultureItem.find('span.phone~strong').text())
-    let cultureItemHome = itemValidCheck(cultureItem.find('span.link~strong').text())
+    let cultureItemTel = cultureItem.find('span.phone~strong').text()
+    let cultureItemHome = cultureItem.find('span.link~strong').text()
 
-    let cultureItemOverView = itemValidCheck((ci('#image_board > div.detail_content > div.detail_cont_txt').text()))
+    let cultureItemOverView = (ci('#image_board > div.detail_content > div.detail_cont_txt').text())
 
+    let item = util.createCrawalingModel(item_sequence,cultureItemTitle,cultureItemAddr,
+        cultureItemTag,cultureItemTel,cultureItemHome,"",cultureItemImagePath,"","",cultureItemOverView
+    )
     
-    // console.log(`title : ${cultureItemTitle}`)
-    // console.log(`addr : ${cultureItemAddr}`)
-    // console.log(`tag : ${cultureItemTag}`)
-    // console.log(`tel : ${cultureItemTel}`)
-    // console.log(`homepage : ${cultureItemHome}`)
-    // console.log(`image : ${cultureItemImagePath}`)
-    // console.log(`overview : ${cultureItemOverView}`)
-    
-    if (item_sequence == 0) {
-        text = `이름,주소,태그,전화번호,홈페이지,운영시간,이미지,소개\n`
-        
-        item_sequence++;
-    }
-
-    text += (item_sequence++) + "." + cultureItemTitle + "," + cultureItemAddr + "," + cultureItemTag + "," + cultureItemTel + "," + cultureItemHome + "," +" "+","+ cultureItemImagePath + "," + cultureItemOverView + "\n"
-
-    // console.log(text)
-    // console.log(`================================================================================`)
-
+    jeonjuItemList.push(item)
+    item_sequence++;
 }
 
-//엑셀 양식별 저장을 위한 문자열 유효성 검사.
-const itemValidCheck = (attr) => {
-    if(typeof(attr) == undefined){
-        attr = ''
-    }else{
-        attr = attr.replace(REGEXP,"")
-    }
-    return attr;
-}
-
-//엑셀 파일로 저장
-const jeonjuItemWrite = async(text)=>{
-    var fs = require('fs');
-
-    await fs.writeFile(`./전주여행정보.csv`, text, async function (err) {
-        if (err) {
-            await console.log(err)
-        } else {
-            await console.log(`PROCESS COMPLETED !!`)
-        }
-    })
-}
 
 //한 탭의 크롤링 작업 시작 , 작업순서 : 페이지수 확보 -> 전체 데이터 확보 -> 상세정보 획득 -> 엑셀 파일 저장
 const startJeonJuCulturePartCrawaling = async(baseURL,tag)=>{
@@ -202,22 +169,10 @@ const startJeonJuCulturePartCrawaling = async(baseURL,tag)=>{
     
 }
 
-const calcurlateTime = (startTime)=>{
-    let elapsed = new Date().getTime() - startTime;
-
-    if (elapsed / 1000 > 60) {
-        minute = Math.round(elapsed / 1000 / 60)
-        elapsed = elapsed / 1000 % 60
-    } else {
-        minute = 0;
-    }
-
-    console.log(`크롤링 소요 시간 : ${minute}분 ${(elapsed / 1000).toFixed(2)}초`);
-}
 
 
 //전체 작업
-const startCrawaling = async() => {
+exports.startJeonJuCrawaling = async() => {
     start = new Date().getTime();
 
     //전주 문화공간 관람시설(JEONJU_CULTURE_ONE_URL) 크롤링
@@ -248,14 +203,9 @@ const startCrawaling = async() => {
     await startJeonJuCulturePartCrawaling(JEONJU_CULTURE_HERITAG_ONE_URL,JEONJU_CULTURE_HERITAG_ONE_TAG);
     console.log("7 문화유적 향토문화유산 crawaling is success..\n")
 
-    console.log(text)
+    // console.log(jeonjuItemList)
+    return jeonjuItemList;
 
-    await jeonjuItemWrite(text)
-    calcurlateTime(start)
-    
-
-   
-  
 }
 
-startCrawaling()
+this.startJeonJuCrawaling()

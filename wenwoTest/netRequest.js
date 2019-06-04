@@ -1,5 +1,7 @@
 let axiosModule = require('axios')
 
+let tryCnt = 0;
+
 exports.networkTestRequest = async(url)=>{
     let result = '';
 
@@ -33,6 +35,7 @@ exports.networkPostRequest = async (url, config) => {
         result = await axiosModule.post(url, config)
 
     } catch (err) {
+        
         console.log(`networkRequest ERROR --->> ${err}`)
     }
 
@@ -47,7 +50,26 @@ exports.useConfigRequest = async (config) => {
         result = await axiosModule(config)
 
     } catch (err) {
-        console.log(`networkRequest ERROR --->> ${err}`)
+        console.log(`useConfigRequest ERROR ===> ${err}`)
+    }
+
+    return result['data'];
+
+}
+
+
+exports.translateLangRequest = async (config) => {
+    console.log(config)
+    let result = ''
+
+    try {
+        result = await axiosModule(config)
+        // console.log(result)
+
+    } catch (err) {
+
+        console.log(err)
+
     }
 
     return result['data'];

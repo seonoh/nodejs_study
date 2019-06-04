@@ -23,7 +23,6 @@ const CREATE_VISIT_DATA_CONFIG = (cnt)=> {
             'locationy': "0",
             'page': "1",
             'cnt': `${cnt}`
-            // 'cnt': `1`
 
         },
         headers: {
@@ -80,6 +79,8 @@ const getKoreaVisitData = async (cnt) => {
 
     try {
         result = await axiosModule(
+            // CREATE_VISIT_DATA_CONFIG(cnt)
+
             CREATE_VISIT_DATA_CONFIG(cnt)
         )
     } catch (err) {
@@ -90,16 +91,11 @@ const getKoreaVisitData = async (cnt) => {
 
     console.log(`크롤링 데이터 TotalCount : ${cnt}`)
 
-    for (let i = 0; i < koreaVisitItem.length; i++) {
+    for (let i = 0; i < cnt; i++) {
 
         await getDetailData(i, koreaVisitItem[i])
         console.log(`크롤링 진행도 : ${i}/${cnt}`)
     }
-
-
-
-
-
 
 }
 // {"cmd":"TOUR_CONTENT_BODY_VIEW","cotid":"d09abaad-511e-492d-a098-efebbb3f0a52"
@@ -119,7 +115,7 @@ const getDetailData = async (index, item) => {
 
     let detailItem = result.data['body']['article'][0]
 
-    console.log(detailItem)
+    // console.log(detailItem)
 
 
     let title = ''
@@ -141,6 +137,7 @@ const getDetailData = async (index, item) => {
 
     try {
         if (typeof (item.title) == undefined) {
+            detailItem.title = detailItem.title;
             title = ''
         } else {
             title = item.title
@@ -163,32 +160,32 @@ const getDetailData = async (index, item) => {
             }
         }
 
-        try {
+        // try {
             if (typeof (detailItem.infoCenter) == 'undefiend') {
-                telNum = ''
+                detailItem.infoCenter = ''
             } else {
-                telNum = detailItem.infoCenter
+                detailItem.infoCenter = detailItem.infoCenter
             }
-        } catch (err) {
-            try {
-                if (typeof (detailItem.tel) == 'undefiend') {
-                    telNum = ''
-                } else {
-                    telNum = detailItem.tel
-                }
-            } catch (err) {
-                try {
-                    if (typeof (detailItem.telNo) == 'undefiend') {
-                        telNum = ''
-                    } else {
-                        telNum = detailItem.telNo
-                    }
-                } catch (err) {
-                    telNum = ''
-                }
-            }
+        // } catch (err) {
+        //     try {
+        //         if (typeof (detailItem.tel) == 'undefiend') {
+        //             telNum = ''
+        //         } else {
+        //             telNum = detailItem.tel
+        //         }
+        //     } catch (err) {
+        //         try {
+        //             if (typeof (detailItem.telNo) == 'undefiend') {
+        //                 telNum = ''
+        //             } else {
+        //                 telNum = detailItem.telNo
+        //             }
+        //         } catch (err) {
+        //             telNum = ''
+        //         }
+        //     }
 
-        }
+        // }
 
 
         try {
@@ -284,15 +281,18 @@ const getDetailData = async (index, item) => {
 }
 
 // 한국관광공사 크롤링 시작
-const startTask = async () => {
+exports.startKoreaVisitCrawaling = async () => {
     start = new Date().getTime();
-    await getTotalCnt();
-    await getKoreaVisitData(totalCnt);
+    
+    await getKoreaVisitData(await getTotalCnt());
+    // await getKoreaVisitData(1);
     console.log("crawaling data is loaded..")
     console.log("crawaling data writing..")
-    await util.writeData('한국관공공사리펙토링버전', koreaVisitDataItemList)
+    console.log(koreaVisitDataItemList)
+    // await util.writeData('한국관공공사리펙토링버전', koreaVisitDataItemList)
     util.calcurlateTime(start,"크롤링 소요 시간")
+    return koreaVisitDataItemList;
 }
 
 
-startTask()
+// this.startKoreaVisitCrawaling()

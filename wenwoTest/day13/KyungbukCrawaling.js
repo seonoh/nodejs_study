@@ -3,8 +3,7 @@ let cheerioModule = require('cheerio')
 let requestModule = require('../netRequest.js')
 let util = require('../util.js')
 let curSequence = 0;
-
-const INIT_ITEM = util.createCrawalingModel('인덱스', '이름', '주소', '태그', '전화번호', '홈페이지', '운영시간/휴무일', '이미지', '소개\n')
+const INIT_ITEM = util.createCrawalingModel('인덱스', '이름', '주소', '태그', '전화번호', '홈페이지', '운영시간/휴무일', '이미지', '입장료', '주차시설', '소개\n')
 let kyungbukItemList = [];
 kyungbukItemList.push(INIT_ITEM)
 
@@ -74,13 +73,15 @@ const getNatureDetailData = async (url, sendedTag) => {
 
 
 }
-const startCrawaling = async () => {
+exports.startKyungbukCrawaling = async () => {
     // await getData(await getPageCnt(KYUNGBUK_NATURE_URL))
     start = new Date().getTime(); 
     await getData(await getPageCnt(KYUNGBUK_ALL_URL))
-    await util.writeData('경북여행정보', kyungbukItemList)
-    util.calcurlateTime(start,'Kyungbuk Crawaling')
+    // await util.writeData('경북여행정보', kyungbukItemList)
+    // util.calcurlateTime(start,'Kyungbuk Crawaling')
+
+    return kyungbukItemList
 
 }
 
-startCrawaling()
+this.startKyungbukCrawaling()

@@ -111,8 +111,6 @@ const getDetailData = async(url,tag='#한국#관광지#관광명소#여행지')=
     koreaVisitSeoulChineseItemList.push(item)
     curSequence++;
 
-    
-
 }
 
 const startKoreaVisiChineseCrawaling = async()=>{
