@@ -1,6 +1,6 @@
 //엑셀 양식에 맞춰 넣기 위해 정규식을 사용하여 문자열 대체
 const REGEXP = /\t|,|\n|\r|;|\\|&nbsp|'|"|(<([^>]+)>)/gi
-const TAG_REGEXP = /\/|,|\.|\|/gi
+const TAG_REGEXP = /\/|,|\.|\|#*/gi
 const customRequestModule = require('../wenwoTest/netRequest.js')
 // const TEL_REGEXP = /\/|' '|,/gi
 
@@ -49,7 +49,13 @@ const itemValidCheck = (attr, type = 'default') => {
         if (attr == 'null') {
             attr = ''
             return attr;
-        } else if (typeof (attr) == 'undefined') {
+        }else if(attr == null){
+            attr = ''
+            return attr;
+        }else if (typeof (attr) == 'undefined') {
+            attr = ''
+            return attr;
+        }else if (attr == 'undefined'){
             attr = ''
             return attr;
         }
@@ -62,6 +68,7 @@ const itemValidCheck = (attr, type = 'default') => {
                     } else {
                         attr = attr.trim()
                         attr = `#${attr.replace(TAG_REGEXP, "#")}`
+                        attr = attr.replace("##",'#')
                     }
                 } else {
                     attr = ''
@@ -84,6 +91,8 @@ const itemValidCheck = (attr, type = 'default') => {
 
                 attr = attr.replace(REGEXP, "")
                 return attr
+            }else{
+                return ''
             }
 
             return attr;
@@ -119,6 +128,22 @@ const itemValidCheck = (attr, type = 'default') => {
 
 
 
+// exports.translateLang = async (beforeLang,afterLang,text)=>{
+
+//     let result = ''
+
+//     try{
+//         result = await customRequestModule.translateLangRequest(PAPAGO_CONFIG(beforeLang,afterLang,text))
+//     }catch(err){
+//         console.log(`TRANSLATE LANG ERROR ===>${err}`)
+//     }
+
+//     console.log(`BEFORE : ${text}\nAFTER : ${result['message']['result']['translatedText']}`)
+//     console.log(`====================================================`)
+    
+//     return result['message']['tex']['translatedText'];
+// }
+
 // 여행지이름, 주소, 태그,전화번호, 홈페이지, 영업일, 이미지, 소개
 exports.createCrawalingModel = (sequence, name, addr, tag, phone, homepage,
      restDate, imgPath, enterCharge, parkInfo, overView) => {
@@ -127,6 +152,7 @@ exports.createCrawalingModel = (sequence, name, addr, tag, phone, homepage,
     model.name = itemValidCheck(name)
     model.addr = itemValidCheck(addr)
     if(sequence == '인덱스'){
+
         model.tag = itemValidCheck(tag, 'tag')
         model.tag = model.tag.replace(/#/gi,"")
     }else{
