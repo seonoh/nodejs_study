@@ -1,0 +1,15 @@
+{
+  "name": "tetris",
+  "version": "1.0.0",
+  "description": "tetris study",
+  "main": "example.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "seonoh",
+  "license": "ISC",
+  "dependencies": {
+    "keypress": "^0.2.1",
+    "terminal-kit": "^1.28.0"
+  }
+}
